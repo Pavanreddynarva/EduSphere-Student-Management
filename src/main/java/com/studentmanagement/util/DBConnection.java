@@ -13,18 +13,27 @@ public class DBConnection {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream input = DBConnection.class
-                .getClassLoader()
-                .getResourceAsStream("db.properties")) {
+        try {
+            // Explicitly load the MySQL JDBC driver.
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-            if (input == null) {
-                throw new IllegalStateException(
-                    "db.properties not found in application resources."
-                );
+            try (InputStream input = DBConnection.class
+                    .getClassLoader()
+                    .getResourceAsStream("db.properties")) {
+
+                if (input == null) {
+                    throw new IllegalStateException(
+                            "db.properties not found in application resources."
+                    );
+                }
+
+                properties.load(input);
             }
 
-            properties.load(input);
-
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError(
+                    "MySQL JDBC driver not found. Check the Maven dependency."
+            );
         } catch (IOException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -37,7 +46,7 @@ public class DBConnection {
 
         if (url == null || username == null || password == null) {
             throw new IllegalStateException(
-                "Database configuration is incomplete."
+                    "Database configuration is incomplete."
             );
         }
 
