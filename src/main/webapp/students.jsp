@@ -1,4 +1,4 @@
-
+]
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
@@ -87,7 +87,11 @@
                     <input type="text" id="studentSearch" class="form-control"
                            placeholder="Search students...">
                 </div>
-                <button type="button" class="btn btn-primary" id="addStudentButton">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        id="addStudentButton"
+                        onclick="openAddStudentForm()">
                     + Add Student
                 </button>
             </div>
@@ -113,7 +117,11 @@
                                 <div class="student-meta"><c:out value="${student.email}"/></div>
                             </td>
                             <td><c:out value="${student.rollNumber}"/></td>
-                            <td><span class="department-badge"><c:out value="${student.department}"/></span></td>
+                            <td>
+                                <span class="department-badge">
+                                    <c:out value="${student.department}"/>
+                                </span>
+                            </td>
                             <td><c:out value="${student.yearOfStudy}"/></td>
                             <td class="marks-cell"><c:out value="${student.marks}"/></td>
                             <td>
@@ -132,11 +140,13 @@
                                        href="${pageContext.request.contextPath}/students?action=edit&id=${student.studentId}">
                                         Edit
                                     </a>
+
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/students"
                                           onsubmit="return confirm('Are you sure you want to delete this student?');">
                                         <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="studentId" value="${student.studentId}">
+                                        <input type="hidden" name="studentId"
+                                               value="${student.studentId}">
                                         <button type="submit" class="btn btn-secondary">Delete</button>
                                     </form>
                                 </div>
@@ -146,20 +156,22 @@
 
                     <c:if test="${empty students}">
                         <tr id="noResultsRow">
-                            <td colspan="7" class="empty-state">No students found. Add your first student!</td>
+                            <td colspan="7" class="empty-state">
+                                No students found. Add your first student!
+                            </td>
                         </tr>
                     </c:if>
                     </tbody>
                 </table>
             </div>
 
-            <div class="table-footer" id="resultCount">
-                Student records
-            </div>
+            <div class="table-footer" id="resultCount">Student records</div>
         </section>
 
-        <section class="panel" id="addStudentSection"
+        <section class="panel"
+                 id="addStudentSection"
                  style="${showAddForm or not empty editStudent ? '' : 'display:none;'}">
+
             <div class="panel-header">
                 <div>
                     <h2 class="panel-title">
@@ -179,7 +191,8 @@
                 <c:choose>
                     <c:when test="${not empty editStudent}">
                         <input type="hidden" name="action" value="update">
-                        <input type="hidden" name="studentId" value="${editStudent.studentId}">
+                        <input type="hidden" name="studentId"
+                               value="${editStudent.studentId}">
                     </c:when>
                     <c:otherwise>
                         <input type="hidden" name="action" value="add">
@@ -187,6 +200,7 @@
                 </c:choose>
 
                 <div class="form-grid">
+
                     <div class="form-group">
                         <label class="form-label" for="rollNumber">Roll Number *</label>
                         <input class="form-control" id="rollNumber" name="rollNumber"
@@ -246,10 +260,11 @@
                                value="<c:out value='${editStudent.marks}'/>"
                                placeholder="e.g. 85" required>
                     </div>
+
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="studentFormSubmit">
                         <c:choose>
                             <c:when test="${not empty editStudent}">Update Student</c:when>
                             <c:otherwise>Save Student</c:otherwise>
@@ -263,5 +278,57 @@
 
     </main>
 </div>
+
+<script>
+function openAddStudentForm() {
+    const section = document.getElementById("addStudentSection");
+    const form = document.getElementById("addStudentForm");
+
+    if (!section || !form) {
+        console.error("Add Student form section was not found.");
+        return;
+    }
+
+    // Reset fields, then clear any values restored by the server in Edit mode.
+    form.reset();
+
+    form.querySelectorAll("input:not([type='hidden']), select, textarea")
+        .forEach(function (field) {
+            field.value = "";
+        });
+
+    // Switch the shared form to Add mode.
+    let actionInput = form.querySelector("input[name='action']");
+    if (!actionInput) {
+        actionInput = document.createElement("input");
+        actionInput.type = "hidden";
+        actionInput.name = "action";
+        form.appendChild(actionInput);
+    }
+    actionInput.value = "add";
+
+    // Remove the ID belonging to the previously edited student.
+    const idInput = form.querySelector("input[name='studentId']");
+    if (idInput) {
+        idInput.remove();
+    }
+
+    // Update the heading and submit button.
+    const heading = section.querySelector(".panel-title");
+    if (heading) {
+        heading.textContent = "Add New Student";
+    }
+
+    const submitButton = document.getElementById("studentFormSubmit");
+    if (submitButton) {
+        submitButton.textContent = "Save Student";
+    }
+
+    // Display the form and scroll to it.
+    section.style.display = "block";
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+</script>
+
 </body>
 </html>
