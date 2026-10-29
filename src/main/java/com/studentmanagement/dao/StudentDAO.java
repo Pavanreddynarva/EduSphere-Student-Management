@@ -17,4 +17,9 @@ public interface StudentDAO {
     boolean updateStudent(Student student);
 
     boolean deleteStudent(int studentId);
+
+    boolean existsByRollNumber(String rollNumber);
+
+    boolean existsByRollNumberExcludingStudent(
+            String rollNumber, int studentId);
 }

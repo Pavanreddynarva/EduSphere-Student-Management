@@ -27,7 +27,8 @@ public class StudentDAOImpl implements StudentDAO {
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps =
-                     con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                     con.prepareStatement(
+                         sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, student.getRollNumber());
             ps.setString(2, student.getFullName());
@@ -50,18 +51,51 @@ public class StudentDAOImpl implements StudentDAO {
         }
     }
 
-   
-@Override
-public Optional<Student> getStudentById(int studentId) {
-    String sql = "SELECT * FROM students WHERE student_id = ?";
+    @Override
+    public Optional<Student> getStudentById(int studentId) {
+        String sql =
+            "SELECT * FROM students WHERE student_id = ?";
 
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        ps.setInt(1, studentId);
+            ps.setInt(1, studentId);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Student student = new Student();
+
+                    student.setStudentId(rs.getInt("student_id"));
+                    student.setRollNumber(rs.getString("roll_number"));
+                    student.setFullName(rs.getString("full_name"));
+                    student.setEmail(rs.getString("email"));
+                    student.setPhone(rs.getString("phone"));
+                    student.setDepartment(rs.getString("department"));
+                    student.setYearOfStudy(
+                        rs.getInt("year_of_study"));
+                    student.setMarks(rs.getBigDecimal("marks"));
+
+                    return Optional.of(student);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to retrieve student", e);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Student> getAllStudents() {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT * FROM students";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
                 Student student = new Student();
 
                 student.setStudentId(rs.getInt("student_id"));
@@ -70,101 +104,117 @@ public Optional<Student> getStudentById(int studentId) {
                 student.setEmail(rs.getString("email"));
                 student.setPhone(rs.getString("phone"));
                 student.setDepartment(rs.getString("department"));
-                student.setYearOfStudy(rs.getInt("year_of_study"));
+                student.setYearOfStudy(
+                    rs.getInt("year_of_study"));
                 student.setMarks(rs.getBigDecimal("marks"));
 
-                return Optional.of(student);
+                students.add(student);
             }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to retrieve students", e);
         }
 
-    } catch (SQLException e) {
-        throw new RuntimeException("Unable to retrieve student", e);
+        return students;
     }
 
-    return Optional.empty();
-}
+    @Override
+    public boolean updateStudent(Student student) {
+        String sql = """
+            UPDATE students
+            SET roll_number = ?, full_name = ?, email = ?,
+                phone = ?, department = ?, year_of_study = ?,
+                marks = ?
+            WHERE student_id = ?
+            """;
 
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-   
-@Override
-public List<Student> getAllStudents() {
-    List<Student> students = new ArrayList<>();
+            ps.setString(1, student.getRollNumber());
+            ps.setString(2, student.getFullName());
+            ps.setString(3, student.getEmail());
+            ps.setString(4, student.getPhone());
+            ps.setString(5, student.getDepartment());
+            ps.setInt(6, student.getYearOfStudy());
+            ps.setBigDecimal(7, student.getMarks());
+            ps.setInt(8, student.getStudentId());
 
-    String sql = "SELECT * FROM students";
+            return ps.executeUpdate() > 0;
 
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-
-        while (rs.next()) {
-            Student student = new Student();
-
-            student.setStudentId(rs.getInt("student_id"));
-            student.setRollNumber(rs.getString("roll_number"));
-            student.setFullName(rs.getString("full_name"));
-            student.setEmail(rs.getString("email"));
-            student.setPhone(rs.getString("phone"));
-            student.setDepartment(rs.getString("department"));
-            student.setYearOfStudy(rs.getInt("year_of_study"));
-            student.setMarks(rs.getBigDecimal("marks"));
-
-            students.add(student);
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to update student", e);
         }
-
-    } catch (SQLException e) {
-        throw new RuntimeException("Unable to retrieve students", e);
     }
 
-    return students;
-}
+    @Override
+    public boolean deleteStudent(int studentId) {
+        String sql =
+            "DELETE FROM students WHERE student_id = ?";
 
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-   
-@Override
-public boolean updateStudent(Student student) {
-    String sql = """
-        UPDATE students
-        SET roll_number = ?, full_name = ?, email = ?,
-            phone = ?, department = ?, year_of_study = ?,
-            marks = ?
-        WHERE student_id = ?
-        """;
+            ps.setInt(1, studentId);
 
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+            return ps.executeUpdate() > 0;
 
-        ps.setString(1, student.getRollNumber());
-        ps.setString(2, student.getFullName());
-        ps.setString(3, student.getEmail());
-        ps.setString(4, student.getPhone());
-        ps.setString(5, student.getDepartment());
-        ps.setInt(6, student.getYearOfStudy());
-        ps.setBigDecimal(7, student.getMarks());
-        ps.setInt(8, student.getStudentId());
-
-        return ps.executeUpdate() > 0;
-
-    } catch (SQLException e) {
-        throw new RuntimeException("Unable to update student", e);
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to delete student", e);
+        }
     }
-}
 
+    // Checks whether any student already uses this roll number.
+    @Override
+    public boolean existsByRollNumber(String rollNumber) {
+        String sql = """
+            SELECT 1
+            FROM students
+            WHERE roll_number = ?
+            LIMIT 1
+            """;
 
-    
-@Override
-public boolean deleteStudent(int studentId) {
-    String sql = "DELETE FROM students WHERE student_id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, rollNumber);
 
-        ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
 
-        return ps.executeUpdate() > 0;
-
-    } catch (SQLException e) {
-        throw new RuntimeException("Unable to delete student", e);
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                "Unable to check roll number", e);
+        }
     }
-}
 
+    // Checks for a duplicate while excluding the student being edited.
+    @Override
+    public boolean existsByRollNumberExcludingStudent(
+            String rollNumber, int studentId) {
+
+        String sql = """
+            SELECT 1
+            FROM students
+            WHERE roll_number = ?
+              AND student_id <> ?
+            LIMIT 1
+            """;
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, rollNumber);
+            ps.setInt(2, studentId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                "Unable to check roll number", e);
+        }
+    }
 }

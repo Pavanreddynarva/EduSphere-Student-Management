@@ -1,6 +1,7 @@
 
 package com.studentmanagement.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,140 +18,115 @@ public class StudentServiceImpl implements StudentService {
         this.studentDAO = new StudentDAOImpl();
     }
 
-    
-@Override
-public void addStudent(Student student) {
+    @Override
+    public void addStudent(Student student) {
 
-    if (student == null) {
-        throw new IllegalArgumentException(
-                "Student cannot be null");
+        validateStudent(student);
+
+        String rollNumber = student.getRollNumber().trim();
+        student.setRollNumber(rollNumber);
+
+        if (studentDAO.existsByRollNumber(rollNumber)) {
+            throw new IllegalArgumentException(
+                "A student with this roll number already exists");
+        }
+
+        studentDAO.addStudent(student);
     }
 
-    if (student.getRollNumber() == null
-            || student.getRollNumber().isBlank()) {
-        throw new IllegalArgumentException(
-                "Roll number is required");
-    }
+    @Override
+    public Optional<Student> getStudentById(int studentId) {
 
-    if (student.getFullName() == null
-            || student.getFullName().isBlank()) {
-        throw new IllegalArgumentException(
-                "Student name is required");
-    }
-
-    if (student.getEmail() == null
-            || student.getEmail().isBlank()) {
-        throw new IllegalArgumentException(
-                "Email is required");
-    }
-
-    if (student.getDepartment() == null
-            || student.getDepartment().isBlank()) {
-        throw new IllegalArgumentException(
-                "Department is required");
-    }
-
-    if (student.getYearOfStudy() < 1
-            || student.getYearOfStudy() > 4) {
-        throw new IllegalArgumentException(
-                "Year of study must be between 1 and 4");
-    }
-
-    if (student.getMarks() != null
-            && (student.getMarks().signum() < 0
-            || student.getMarks().compareTo(
-                    new java.math.BigDecimal("100")) > 0)) {
-        throw new IllegalArgumentException(
-                "Marks must be between 0 and 100");
-    }
-
-    studentDAO.addStudent(student);
-}
-
-
-    
-@Override
-public Optional<Student> getStudentById(int studentId) {
-
-    if (studentId <= 0) {
-        throw new IllegalArgumentException(
+        if (studentId <= 0) {
+            throw new IllegalArgumentException(
                 "Student ID must be greater than zero");
-    }
+        }
 
-    return studentDAO.getStudentById(studentId);
-}
+        return studentDAO.getStudentById(studentId);
+    }
 
     @Override
     public List<Student> getAllStudents() {
         return studentDAO.getAllStudents();
     }
 
-   
-@Override
-public boolean updateStudent(Student student) {
+    @Override
+    public boolean updateStudent(Student student) {
 
-    if (student == null) {
-        throw new IllegalArgumentException(
-                "Student cannot be null");
-    }
+        validateStudent(student);
 
-    if (student.getStudentId() <= 0) {
-        throw new IllegalArgumentException(
+        if (student.getStudentId() <= 0) {
+            throw new IllegalArgumentException(
                 "Valid student ID is required");
+        }
+
+        String rollNumber = student.getRollNumber().trim();
+        student.setRollNumber(rollNumber);
+
+        if (studentDAO.existsByRollNumberExcludingStudent(
+                rollNumber, student.getStudentId())) {
+            throw new IllegalArgumentException(
+                "Another student already uses this roll number");
+        }
+
+        return studentDAO.updateStudent(student);
     }
 
-    if (student.getRollNumber() == null
-            || student.getRollNumber().isBlank()) {
-        throw new IllegalArgumentException(
-                "Roll number is required");
-    }
+    @Override
+    public boolean deleteStudent(int studentId) {
 
-    if (student.getFullName() == null
-            || student.getFullName().isBlank()) {
-        throw new IllegalArgumentException(
-                "Student name is required");
-    }
-
-    if (student.getEmail() == null
-            || student.getEmail().isBlank()) {
-        throw new IllegalArgumentException(
-                "Email is required");
-    }
-
-    if (student.getDepartment() == null
-            || student.getDepartment().isBlank()) {
-        throw new IllegalArgumentException(
-                "Department is required");
-    }
-
-    if (student.getYearOfStudy() < 1
-            || student.getYearOfStudy() > 4) {
-        throw new IllegalArgumentException(
-                "Year of study must be between 1 and 4");
-    }
-
-    if (student.getMarks() != null
-            && (student.getMarks().signum() < 0
-            || student.getMarks().compareTo(
-                    new java.math.BigDecimal("100")) > 0)) {
-        throw new IllegalArgumentException(
-                "Marks must be between 0 and 100");
-    }
-
-    return studentDAO.updateStudent(student);
-}
-
-
-    
-@Override
-public boolean deleteStudent(int studentId) {
-
-    if (studentId <= 0) {
-        throw new IllegalArgumentException(
+        if (studentId <= 0) {
+            throw new IllegalArgumentException(
                 "Student ID must be greater than zero");
+        }
+
+        return studentDAO.deleteStudent(studentId);
     }
 
-    return studentDAO.deleteStudent(studentId);
-}
+    private void validateStudent(Student student) {
 
+        if (student == null) {
+            throw new IllegalArgumentException(
+                "Student cannot be null");
+        }
+
+        if (student.getRollNumber() == null
+                || student.getRollNumber().isBlank()) {
+            throw new IllegalArgumentException(
+                "Roll number is required");
+        }
+
+        if (student.getFullName() == null
+                || student.getFullName().isBlank()) {
+            throw new IllegalArgumentException(
+                "Student name is required");
+        }
+
+        if (student.getEmail() == null
+                || student.getEmail().isBlank()) {
+            throw new IllegalArgumentException(
+                "Email is required");
+        }
+
+        if (student.getDepartment() == null
+                || student.getDepartment().isBlank()) {
+            throw new IllegalArgumentException(
+                "Department is required");
+        }
+
+        if (student.getYearOfStudy() < 1
+                || student.getYearOfStudy() > 4) {
+            throw new IllegalArgumentException(
+                "Year of study must be between 1 and 4");
+        }
+
+        BigDecimal marks = student.getMarks();
+
+        if (marks != null
+                && (marks.signum() < 0
+                || marks.compareTo(new BigDecimal("100")) > 0)) {
+            throw new IllegalArgumentException(
+                "Marks must be between 0 and 100");
+        }
+    }
 }

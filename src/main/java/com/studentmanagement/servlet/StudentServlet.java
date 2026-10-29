@@ -1,4 +1,3 @@
-
 package com.studentmanagement.servlet;
 
 import java.io.IOException;
@@ -26,7 +25,6 @@ public class StudentServlet extends HttpServlet {
         studentService = new StudentServiceImpl();
     }
 
-    // READ: display students or load one student for editing.
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
@@ -47,6 +45,7 @@ public class StudentServlet extends HttpServlet {
                 }
 
                 int id = Integer.parseInt(idValue);
+
                 Optional<Student> result =
                         studentService.getStudentById(id);
 
@@ -60,7 +59,13 @@ public class StudentServlet extends HttpServlet {
 
                 request.setAttribute("editStudent", result.get());
 
-           } catch (IllegalArgumentException e) {
+            } catch (NumberFormatException e) {
+                response.sendError(
+                        HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid student ID."
+                );
+                return;
+            } catch (IllegalArgumentException e) {
                 response.sendError(
                         HttpServletResponse.SC_BAD_REQUEST,
                         "Invalid student ID."
@@ -69,8 +74,7 @@ public class StudentServlet extends HttpServlet {
             }
         }
 
-        List<Student> students = studentService.getAllStudents();
-        request.setAttribute("students", students);
+        request.setAttribute("students", studentService.getAllStudents());
 
         String success = request.getParameter("success");
 
@@ -92,7 +96,6 @@ public class StudentServlet extends HttpServlet {
                 .forward(request, response);
     }
 
-    // CREATE, UPDATE and DELETE.
     @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response)
@@ -103,11 +106,8 @@ public class StudentServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
-            // DELETE
             if ("delete".equals(action)) {
-                int id = Integer.parseInt(
-                        required(request, "studentId")
-                );
+                int id = Integer.parseInt(required(request, "studentId"));
 
                 boolean deleted = studentService.deleteStudent(id);
 
@@ -121,7 +121,12 @@ public class StudentServlet extends HttpServlet {
                 return;
             }
 
-            // CREATE or UPDATE
+            if (!"add".equals(action) && !"update".equals(action)) {
+                throw new IllegalArgumentException(
+                        "Unknown student operation."
+                );
+            }
+
             String rollNumber = required(request, "rollNumber");
             String fullName = required(request, "fullName");
             String email = required(request, "email");
@@ -138,8 +143,8 @@ public class StudentServlet extends HttpServlet {
                 );
             }
 
-            if (!phone.isEmpty() &&
-                    !phone.matches("^[6-9][0-9]{9}$")) {
+            if (!phone.isEmpty()
+                    && !phone.matches("^[6-9][0-9]{9}$")) {
                 throw new IllegalArgumentException(
                         "Enter a valid 10-digit Indian mobile number."
                 );
@@ -153,17 +158,19 @@ public class StudentServlet extends HttpServlet {
                 );
             }
 
-            BigDecimal marks = null;
+            if (marksValue.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Please enter the student's marks."
+                );
+            }
 
-            if (!marksValue.isEmpty()) {
-                marks = new BigDecimal(marksValue);
+            BigDecimal marks = new BigDecimal(marksValue);
 
-                if (marks.compareTo(BigDecimal.ZERO) < 0 ||
-                        marks.compareTo(new BigDecimal("100")) > 0) {
-                    throw new IllegalArgumentException(
-                            "Marks must be between 0 and 100."
-                    );
-                }
+            if (marks.compareTo(BigDecimal.ZERO) < 0
+                    || marks.compareTo(new BigDecimal("100")) > 0) {
+                throw new IllegalArgumentException(
+                        "Marks must be between 0 and 100."
+                );
             }
 
             Student student = new Student(
@@ -177,10 +184,7 @@ public class StudentServlet extends HttpServlet {
             );
 
             if ("update".equals(action)) {
-                int id = Integer.parseInt(
-                        required(request, "studentId")
-                );
-
+                int id = Integer.parseInt(required(request, "studentId"));
                 student.setStudentId(id);
 
                 boolean updated = studentService.updateStudent(student);
@@ -194,15 +198,6 @@ public class StudentServlet extends HttpServlet {
                 redirect(response, request, "updated");
 
             } else {
-                // Missing or "add" action means CREATE.
-                if (action != null &&
-                        !action.isBlank() &&
-                        !"add".equals(action)) {
-                    throw new IllegalArgumentException(
-                            "Unknown student operation."
-                    );
-                }
-
                 studentService.addStudent(student);
                 redirect(response, request, "added");
             }
@@ -210,20 +205,21 @@ public class StudentServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             showError(
                     request, response,
-                    "Year, marks, and student ID must contain valid numbers."
+                    "Year, marks, and student ID must contain valid numbers.",
+                    action
             );
 
         } catch (IllegalArgumentException e) {
-            showError(request, response, e.getMessage());
+            showError(request, response, e.getMessage(), action);
 
         } catch (Exception e) {
             log("Student operation failed", e);
 
             showError(
-                    request, response,
-                    "The operation failed. Check that roll number and email "
-                            + "are unique, then try again."
-            );
+        request, response,
+        "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage(),
+        action
+);
         }
     }
 
@@ -248,6 +244,7 @@ public class StudentServlet extends HttpServlet {
                           HttpServletRequest request,
                           String result)
             throws IOException {
+
         response.sendRedirect(
                 request.getContextPath() + "/students?success=" + result
         );
@@ -255,16 +252,55 @@ public class StudentServlet extends HttpServlet {
 
     private void showError(HttpServletRequest request,
                            HttpServletResponse response,
-                           String message)
+                           String message,
+                           String action)
             throws ServletException, IOException {
 
-        request.setAttribute("formError", message);
-        request.setAttribute("showAddForm", true);
-        request.setAttribute(
-                "students", studentService.getAllStudents()
+        Student submittedStudent = new Student(
+                value(request, "rollNumber"),
+                value(request, "fullName"),
+                value(request, "email"),
+                value(request, "phone").isEmpty()
+                        ? null : value(request, "phone"),
+                value(request, "department"),
+                parseInteger(value(request, "yearOfStudy")),
+                parseMarks(value(request, "marks"))
         );
+
+        request.setAttribute("formError", message);
+        request.setAttribute("submittedStudent", submittedStudent);
+        request.setAttribute("showAddForm", true);
+
+        if ("update".equals(action)) {
+            int id = parseInteger(value(request, "studentId"));
+
+            if (id > 0) {
+                submittedStudent.setStudentId(id);
+                request.setAttribute("editStudent", submittedStudent);
+            }
+        }
+
+        List<Student> students = studentService.getAllStudents();
+        request.setAttribute("students", students);
 
         request.getRequestDispatcher("/students.jsp")
                 .forward(request, response);
+    }
+
+    private int parseInteger(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private BigDecimal parseMarks(String value) {
+        try {
+            return value == null || value.isBlank()
+                    ? null : new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
