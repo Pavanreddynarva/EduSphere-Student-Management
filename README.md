@@ -89,17 +89,7 @@ QR Attendance Notes
 - The manual attendance-token option is available as a fallback when camera scanning is unsupported or unavailable.
 - The browser needs access to the jsQR library used by the scanner.
 Repository Structure
-EduSphere-Student-Management/
-├── database/                 # Database setup and upgrade SQL scripts
-├── src/
-│   ├── main/
-│   │   ├── java/              # Servlets, services, DAOs, models and utilities
-│   │   ├── resources/          # Database configuration example
-│   │   └── webapp/             # JSP pages, CSS, JavaScript and web resources
-│   └── test/                  # Tests, if present
-├── pom.xml                    # Maven project configuration
-└── README.md
-Security
+
 - Never publish real database credentials, API tokens, or other secrets.
 - Use unique passwords and change any initial account password after signing in.
 - Use HTTPS when accessing camera-based attendance from a device other than the local machine.
