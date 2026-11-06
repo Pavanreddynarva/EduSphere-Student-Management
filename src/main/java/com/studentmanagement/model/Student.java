@@ -12,22 +12,36 @@ public class Student {
     private String phone;
     private String department;
     private int yearOfStudy;
+    private String section;
     private BigDecimal marks;
 
     public Student() {
     }
 
+    // Constructor with section
     public Student(String rollNumber, String fullName,
                    String email, String phone,
                    String department, int yearOfStudy,
-                   BigDecimal marks) {
+                   String section, BigDecimal marks) {
+
         this.rollNumber = rollNumber;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.department = department;
         this.yearOfStudy = yearOfStudy;
+        this.section = section;
         this.marks = marks;
+    }
+
+    // Backward-compatible constructor without section
+    public Student(String rollNumber, String fullName,
+                   String email, String phone,
+                   String department, int yearOfStudy,
+                   BigDecimal marks) {
+
+        this(rollNumber, fullName, email, phone,
+             department, yearOfStudy, "A", marks);
     }
 
     public int getStudentId() {
@@ -84,6 +98,14 @@ public class Student {
 
     public void setYearOfStudy(int yearOfStudy) {
         this.yearOfStudy = yearOfStudy;
+    }
+
+    public String getSection() {
+        return section;
+    }
+
+    public void setSection(String section) {
+        this.section = section;
     }
 
     public BigDecimal getMarks() {

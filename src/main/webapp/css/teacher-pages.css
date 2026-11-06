@@ -1,0 +1,160 @@
+/* EduSphere Teacher sub-pages: shared, scoped presentation */
+.teacher-page .main-content { padding: 34px 38px; }
+.teacher-page .topbar { margin-bottom: 28px; }
+.teacher-page .teacher-page-content { width: 100%; max-width: 1420px; }
+.teacher-page .teacher-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    align-items: start;
+}
+.teacher-page .teacher-card {
+    min-width: 0;
+    padding: 24px 26px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(25, 35, 65, .045);
+}
+.teacher-page .teacher-card h2,
+.teacher-page .teacher-card h3 {
+    margin: 0 0 7px;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 750;
+    letter-spacing: -.25px;
+}
+.teacher-page .card-description {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+.teacher-page .form-group { margin-bottom: 16px; }
+.teacher-page .form-group label,
+.teacher-page .teacher-form label {
+    display: block;
+    margin-bottom: 7px;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 700;
+}
+.teacher-page input:not([type="hidden"]),
+.teacher-page select,
+.teacher-page textarea {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d8dfeb;
+    border-radius: 9px;
+    outline: none;
+    background: #fff;
+    color: var(--text);
+    font-size: 13px;
+    transition: border-color .18s, box-shadow .18s;
+}
+.teacher-page textarea { min-height: 104px; resize: vertical; }
+.teacher-page input:focus,
+.teacher-page select:focus,
+.teacher-page textarea:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .11);
+}
+.teacher-page .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.teacher-page .teacher-card .btn { margin-top: 2px; }
+.teacher-page .teacher-card-wide { grid-column: 1 / -1; }
+.teacher-page .qr-panel { text-align: center; }
+.teacher-page .qr-panel img {
+    display: block;
+    width: 220px;
+    height: 220px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 16px auto;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+}
+.teacher-page .session-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0;
+}
+.teacher-page .meta-chip {
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f8faff;
+    color: #475467;
+    font-size: 12px;
+}
+.teacher-page .status-note {
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 12px;
+}
+.teacher-page .alert { max-width: 1420px; }
+.teacher-page .logout-row { margin-top: 24px; }
+.teacher-page .logout-row .btn { padding: 10px 16px; }
+.teacher-page .assessment-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 18px;
+}
+.teacher-page .assessment-form-grid .form-group { margin-bottom: 15px; }
+.teacher-page .assessment-form-grid .full-row { grid-column: 1 / -1; }
+.teacher-page .table-wrap { width: 100%; overflow-x: auto; margin-top: 15px; }
+.teacher-page .teacher-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.teacher-page .teacher-table th {
+    padding: 13px 14px;
+    background: #f6f8fc;
+    color: #475467;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: .35px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+}
+.teacher-page .teacher-table td {
+    padding: 13px 14px;
+    color: #344054;
+    border-bottom: 1px solid #edf0f5;
+    vertical-align: middle;
+}
+.teacher-page .teacher-table tbody tr:hover { background: #fafbff; }
+.teacher-page .empty-state {
+    padding: 22px;
+    border: 1px dashed #d8dfeb;
+    border-radius: 10px;
+    background: #fafbfe;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+.teacher-page .inline-error { margin-top: 12px; color: var(--danger); font-size: 12px; }
+@media (max-width: 1050px) {
+    .teacher-page .teacher-card-grid { grid-template-columns: 1fr; }
+    .teacher-page .teacher-card-wide { grid-column: auto; }
+}
+@media (max-width: 700px) {
+    .teacher-page .main-content { padding: 24px 18px; }
+    .teacher-page .teacher-card { padding: 20px 18px; }
+    .teacher-page .form-row,
+    .teacher-page .assessment-form-grid { grid-template-columns: 1fr; }
+    .teacher-page .assessment-form-grid .full-row { grid-column: auto; }
+    .teacher-page .topbar { align-items: flex-start; }
+}

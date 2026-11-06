@@ -1,3 +1,4 @@
+
 package com.studentmanagement.servlet;
 
 import java.io.IOException;
@@ -39,8 +40,7 @@ public class StudentServlet extends HttpServlet {
                 if (idValue == null || idValue.isBlank()) {
                     response.sendError(
                             HttpServletResponse.SC_BAD_REQUEST,
-                            "Student ID is required."
-                    );
+                            "Student ID is required.");
                     return;
                 }
 
@@ -52,8 +52,7 @@ public class StudentServlet extends HttpServlet {
                 if (result.isEmpty()) {
                     response.sendError(
                             HttpServletResponse.SC_NOT_FOUND,
-                            "Student not found."
-                    );
+                            "Student not found.");
                     return;
                 }
 
@@ -62,14 +61,12 @@ public class StudentServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 response.sendError(
                         HttpServletResponse.SC_BAD_REQUEST,
-                        "Invalid student ID."
-                );
+                        "Invalid student ID.");
                 return;
             } catch (IllegalArgumentException e) {
                 response.sendError(
                         HttpServletResponse.SC_BAD_REQUEST,
-                        "Invalid student ID."
-                );
+                        "Invalid student ID.");
                 return;
             }
         }
@@ -80,16 +77,13 @@ public class StudentServlet extends HttpServlet {
 
         if ("added".equals(success)) {
             request.setAttribute(
-                    "successMessage", "Student added successfully!"
-            );
+                    "successMessage", "Student added successfully!");
         } else if ("updated".equals(success)) {
             request.setAttribute(
-                    "successMessage", "Student updated successfully!"
-            );
+                    "successMessage", "Student updated successfully!");
         } else if ("deleted".equals(success)) {
             request.setAttribute(
-                    "successMessage", "Student deleted successfully!"
-            );
+                    "successMessage", "Student deleted successfully!");
         }
 
         request.getRequestDispatcher("/students.jsp")
@@ -113,8 +107,7 @@ public class StudentServlet extends HttpServlet {
 
                 if (!deleted) {
                     throw new IllegalArgumentException(
-                            "Student not found or already deleted."
-                    );
+                            "Student not found or already deleted.");
                 }
 
                 redirect(response, request, "deleted");
@@ -123,8 +116,7 @@ public class StudentServlet extends HttpServlet {
 
             if (!"add".equals(action) && !"update".equals(action)) {
                 throw new IllegalArgumentException(
-                        "Unknown student operation."
-                );
+                        "Unknown student operation.");
             }
 
             String rollNumber = required(request, "rollNumber");
@@ -132,6 +124,7 @@ public class StudentServlet extends HttpServlet {
             String email = required(request, "email");
             String department = required(request, "department");
             String yearValue = required(request, "yearOfStudy");
+            String section = required(request, "section");
 
             String phone = value(request, "phone");
             String marksValue = value(request, "marks");
@@ -139,29 +132,30 @@ public class StudentServlet extends HttpServlet {
             if (!email.matches(
                     "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
                 throw new IllegalArgumentException(
-                        "Please enter a valid email address."
-                );
+                        "Please enter a valid email address.");
             }
 
             if (!phone.isEmpty()
                     && !phone.matches("^[6-9][0-9]{9}$")) {
                 throw new IllegalArgumentException(
-                        "Enter a valid 10-digit Indian mobile number."
-                );
+                        "Enter a valid 10-digit Indian mobile number.");
             }
 
             int year = Integer.parseInt(yearValue);
 
             if (year < 1 || year > 4) {
                 throw new IllegalArgumentException(
-                        "Year of study must be between 1 and 4."
-                );
+                        "Year of study must be between 1 and 4.");
+            }
+
+            if (!section.matches("^[A-Za-z0-9]{1,20}$")) {
+                throw new IllegalArgumentException(
+                        "Enter a valid section.");
             }
 
             if (marksValue.isEmpty()) {
                 throw new IllegalArgumentException(
-                        "Please enter the student's marks."
-                );
+                        "Please enter the student's marks.");
             }
 
             BigDecimal marks = new BigDecimal(marksValue);
@@ -169,8 +163,7 @@ public class StudentServlet extends HttpServlet {
             if (marks.compareTo(BigDecimal.ZERO) < 0
                     || marks.compareTo(new BigDecimal("100")) > 0) {
                 throw new IllegalArgumentException(
-                        "Marks must be between 0 and 100."
-                );
+                        "Marks must be between 0 and 100.");
             }
 
             Student student = new Student(
@@ -180,6 +173,7 @@ public class StudentServlet extends HttpServlet {
                     phone.isEmpty() ? null : phone,
                     department,
                     year,
+                    section,
                     marks
             );
 
@@ -191,8 +185,7 @@ public class StudentServlet extends HttpServlet {
 
                 if (!updated) {
                     throw new IllegalArgumentException(
-                            "Student not found or no update was made."
-                    );
+                            "Student not found or no update was made.");
                 }
 
                 redirect(response, request, "updated");
@@ -216,10 +209,11 @@ public class StudentServlet extends HttpServlet {
             log("Student operation failed", e);
 
             showError(
-        request, response,
-        "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage(),
-        action
-);
+                    request, response,
+                    "Error: " + e.getClass().getSimpleName()
+                            + " - " + e.getMessage(),
+                    action
+            );
         }
     }
 
@@ -228,8 +222,7 @@ public class StudentServlet extends HttpServlet {
 
         if (result == null || result.trim().isEmpty()) {
             throw new IllegalArgumentException(
-                    "Please fill in all required fields."
-            );
+                    "Please fill in all required fields.");
         }
 
         return result.trim();
@@ -264,6 +257,7 @@ public class StudentServlet extends HttpServlet {
                         ? null : value(request, "phone"),
                 value(request, "department"),
                 parseInteger(value(request, "yearOfStudy")),
+                value(request, "section"),
                 parseMarks(value(request, "marks"))
         );
 

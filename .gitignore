@@ -1,15 +1,41 @@
-﻿target/
-.idea/
-.vscode/
-*.iml
+# Maven build output
+/target/
+*.war
+
+# Local database credentials
+/src/main/resources/db.properties
+/src/main/resources/db.properties.before-*
+
+# Local and temporary configuration
 .env
 .env.*
 !.env.example
-config.properties
-application.properties
-src/main/resources/db.properties
+ngrok.yml
+
+# Backup folders and files
+/backup-*/
+/backup*/
+*.before-sidebar-integration
+
+# Unused root deployment files
+/WEB-INF/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Logs and operating system files
 *.log
 .DS_Store
 Thumbs.db
+# Backup JSP files
+*.day*-backup
+*day7-backup*
+*.before-button-fix
 
-classpath.txt
+/classpath.txt
+*.before-button-fix

@@ -21,8 +21,8 @@ public class StudentDAOImpl implements StudentDAO {
         String sql = """
             INSERT INTO students
             (roll_number, full_name, email, phone,
-             department, year_of_study, marks)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+             department, year_of_study, section, marks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
         try (Connection con = DBConnection.getConnection();
@@ -36,7 +36,8 @@ public class StudentDAOImpl implements StudentDAO {
             ps.setString(4, student.getPhone());
             ps.setString(5, student.getDepartment());
             ps.setInt(6, student.getYearOfStudy());
-            ps.setBigDecimal(7, student.getMarks());
+            ps.setString(7, student.getSection());
+            ps.setBigDecimal(8, student.getMarks());
 
             ps.executeUpdate();
 
@@ -71,8 +72,8 @@ public class StudentDAOImpl implements StudentDAO {
                     student.setEmail(rs.getString("email"));
                     student.setPhone(rs.getString("phone"));
                     student.setDepartment(rs.getString("department"));
-                    student.setYearOfStudy(
-                        rs.getInt("year_of_study"));
+                    student.setYearOfStudy(rs.getInt("year_of_study"));
+                    student.setSection(rs.getString("section"));
                     student.setMarks(rs.getBigDecimal("marks"));
 
                     return Optional.of(student);
@@ -104,8 +105,8 @@ public class StudentDAOImpl implements StudentDAO {
                 student.setEmail(rs.getString("email"));
                 student.setPhone(rs.getString("phone"));
                 student.setDepartment(rs.getString("department"));
-                student.setYearOfStudy(
-                    rs.getInt("year_of_study"));
+                student.setYearOfStudy(rs.getInt("year_of_study"));
+                student.setSection(rs.getString("section"));
                 student.setMarks(rs.getBigDecimal("marks"));
 
                 students.add(student);
@@ -124,7 +125,7 @@ public class StudentDAOImpl implements StudentDAO {
             UPDATE students
             SET roll_number = ?, full_name = ?, email = ?,
                 phone = ?, department = ?, year_of_study = ?,
-                marks = ?
+                section = ?, marks = ?
             WHERE student_id = ?
             """;
 
@@ -137,8 +138,9 @@ public class StudentDAOImpl implements StudentDAO {
             ps.setString(4, student.getPhone());
             ps.setString(5, student.getDepartment());
             ps.setInt(6, student.getYearOfStudy());
-            ps.setBigDecimal(7, student.getMarks());
-            ps.setInt(8, student.getStudentId());
+            ps.setString(7, student.getSection());
+            ps.setBigDecimal(8, student.getMarks());
+            ps.setInt(9, student.getStudentId());
 
             return ps.executeUpdate() > 0;
 
@@ -164,7 +166,6 @@ public class StudentDAOImpl implements StudentDAO {
         }
     }
 
-    // Checks whether any student already uses this roll number.
     @Override
     public boolean existsByRollNumber(String rollNumber) {
         String sql = """
@@ -189,7 +190,6 @@ public class StudentDAOImpl implements StudentDAO {
         }
     }
 
-    // Checks for a duplicate while excluding the student being edited.
     @Override
     public boolean existsByRollNumberExcludingStudent(
             String rollNumber, int studentId) {
